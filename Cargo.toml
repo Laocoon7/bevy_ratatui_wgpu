@@ -2,6 +2,16 @@
 name = "bevy_ratatui_wgpu"
 version = "0.1.0"
 edition = "2024"
+authors = ["Wes Feldsine <laocoon7@gmail.com>"]
+description = "Bevy Plugin to run Ratatui directly on a WGPU window"
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/Laocoon7/bevy_ratatui_wgpu"
+# documentation = "https://docs.rs/bevy_ratatui_wgpu"
+homepage = "https://github.com/Laocoon7/bevy_ratatui_wgpu"
+keywords = ["bevy", "ratatui", "wgpu", "window"]
+categories = ["game-development", "gui", "graphics", "rendering"]
+
 
 [lints.rust]
 missing_docs = "warn"
