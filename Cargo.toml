@@ -1,0 +1,30 @@
+[package]
+name = "bevy_ratatui_wgpu"
+version = "0.1.0"
+edition = "2024"
+
+[lints.rust]
+missing_docs = "warn"
+
+[dependencies]
+bevy = { version = "0.19", default-features = false, features = [
+    "async_executor",
+    "bevy_log",
+    "bevy_winit",
+    "bevy_window",
+] }
+ratatui = { version = "0.30", default-features = false }
+ratatui-wgpu = "0.5"
+
+[dev-dependencies]
+ratatui = { version = "0.30", default-features = false, features = ["all-widgets"] }
+
+[[example]]
+name = "basic"
+description = "The most basic example"
+path = "examples/basic.rs"
+
+[[example]]
+name = "multiple_windows"
+description = "How to handle multiple windows"
+path = "examples/multiple_windows.rs"
