@@ -31,10 +31,8 @@ ratatui = { version = "0.30", default-features = false, features = ["all-widgets
 
 [[example]]
 name = "basic"
-description = "The most basic example"
 path = "examples/basic.rs"
 
 [[example]]
 name = "multiple_windows"
-description = "How to handle multiple windows"
 path = "examples/multiple_windows.rs"

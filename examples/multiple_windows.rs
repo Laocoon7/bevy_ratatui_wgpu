@@ -11,13 +11,18 @@ use ratatui::{
 };
 
 #[derive(Component)]
-#[require(Window)]
 struct SecondaryWindow;
 
 fn main() {
     let mut app = App::new();
 
-    app.add_plugins(BevyRatatuiMinimalPlugins);
+    app.add_plugins(BevyRatatuiMinimalPlugins.set(WindowPlugin {
+        primary_window: Some(Window {
+            title: "Primary Window".to_string(),
+            ..Default::default()
+        }),
+        ..Default::default()
+    }));
     app.add_plugins(BevyRatatuiWgpuPlugin);
 
     app.add_systems(Startup, spawn_second_window);
@@ -28,45 +33,41 @@ fn main() {
 }
 
 fn spawn_second_window(mut commands: Commands) {
-    commands.spawn(SecondaryWindow);
+    commands.spawn((
+        SecondaryWindow,
+        Window {
+            title: "Secondary Window".to_string(),
+            ..Default::default()
+        },
+    ));
 }
 
-fn draw_primary_window(
-    primary_window: Single<Entity, With<PrimaryWindow>>,
-    mut q_terminals: Query<&mut RatatuiTerminal>,
-) {
-    let primary_window = primary_window.into_inner();
+fn draw_primary_window(primary_window: Single<&mut RatatuiTerminal, With<PrimaryWindow>>) {
+    let mut primary_window = primary_window.into_inner();
 
-    if let Ok(mut ratatui_terminal) = q_terminals.get_mut(primary_window) {
-        ratatui_terminal
-            .terminal
-            .draw(|f| {
-                f.render_widget(
-                    Paragraph::new("Primary Window").red().block(Block::bordered().title("Primary").black()),
-                    f.area(),
-                )
-            })
-            .unwrap();
-    }
+    primary_window
+        .terminal
+        .draw(|f| {
+            f.render_widget(
+                Paragraph::new("Primary Window").red().block(Block::bordered().title("Primary").black()),
+                f.area(),
+            )
+        })
+        .unwrap();
 }
 
-fn draw_secondary_window(
-    secondary_window: Single<Entity, With<SecondaryWindow>>,
-    mut q_terminals: Query<&mut RatatuiTerminal>,
-) {
-    let secondary_window = secondary_window.into_inner();
+fn draw_secondary_window(secondary_window: Single<&mut RatatuiTerminal, With<SecondaryWindow>>) {
+    let mut secondary_window = secondary_window.into_inner();
 
-    if let Ok(mut ratatui_terminal) = q_terminals.get_mut(secondary_window) {
-        ratatui_terminal
-            .terminal
-            .draw(|f| {
-                f.render_widget(
-                    Paragraph::new("Secondary Window")
-                        .green()
-                        .block(Block::bordered().title("Secondary").black()),
-                    f.area(),
-                )
-            })
-            .unwrap();
-    }
+    secondary_window
+        .terminal
+        .draw(|f| {
+            f.render_widget(
+                Paragraph::new("Secondary Window")
+                    .green()
+                    .block(Block::bordered().title("Secondary").black()),
+                f.area(),
+            )
+        })
+        .unwrap();
 }

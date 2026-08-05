@@ -17,14 +17,14 @@ pub mod components;
 pub mod messages;
 pub(crate) mod systems;
 
-mod fonts;
-pub(crate) use self::fonts::*;
-
 mod bevy_ratatui_minimal_plugins;
 pub use self::bevy_ratatui_minimal_plugins::*;
 
 mod bevy_ratatui_wgpu_plugin;
 pub use self::bevy_ratatui_wgpu_plugin::*;
+
+mod fonts;
+pub(crate) use self::fonts::*;
 
 /// The prelude provides easy access to the most commonly used types in this crate.
 pub mod prelude {
