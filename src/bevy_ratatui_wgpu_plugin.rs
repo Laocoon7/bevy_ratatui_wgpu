@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::systems::{on_window_created, on_window_resized};
+use crate::{
+    resources::BevyRatatuiWgpuOptions,
+    systems::{on_window_created, on_window_resized},
+};
 
 /// The core plugin that integrates Ratatui into Bevy via WGPU.
 ///
@@ -10,6 +13,7 @@ use crate::systems::{on_window_created, on_window_resized};
 pub struct BevyRatatuiWgpuPlugin;
 impl Plugin for BevyRatatuiWgpuPlugin {
     fn build(&self, app: &mut App) {
+        app.init_resource::<BevyRatatuiWgpuOptions>();
         app.add_systems(Update, (on_window_created, on_window_resized));
     }
 }

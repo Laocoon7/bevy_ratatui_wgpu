@@ -20,6 +20,8 @@ This crate provides two plugins:
 
   - When a new window is created, Bevy Ratatui WGPU will create the terminal and insert a `RatatuiTerminal` component which holds the `ratatui::Terminal`.
 
+  - See `BevyRatatuiWgpuOptions` for more options.
+
 - Resizing
   - BevyRatatuiWGPU automatically handles resizing the terminal when the window resizes.
 

@@ -9,7 +9,7 @@ use bevy::{
 use ratatui::prelude::Terminal;
 use ratatui_wgpu::{Builder, Dimensions, Font};
 
-use crate::{DEFAULT_FONT, components::RatatuiTerminal};
+use crate::{DEFAULT_FONT, components::RatatuiTerminal, resources::BevyRatatuiWgpuOptions};
 
 /// Listens for `WindowCreated` messages, fetches the window's raw handle and size,
 /// initializes the WGPU terminal backend with the default font, and inserts
@@ -18,6 +18,7 @@ pub fn on_window_created(
     mut m_window_created: MessageReader<WindowCreated>,
     mut commands: Commands,
     // winit_windows: NonSend<WinitWindows>,
+    options: Res<BevyRatatuiWgpuOptions>,
     q_windows: Query<&RawHandleWrapper>,
     _non_send_marker: NonSendMarker, // no NonSend<> resources in 0.19, must build backend on main thread
 ) {
@@ -38,20 +39,39 @@ pub fn on_window_created(
             let size = winit_window.inner_size();
 
             // Build the font
-            let Some(font) = Font::new(DEFAULT_FONT) else {
-                warn!("Failed to build font.");
-                continue;
+            let font = if let Some(font) = options.default_font.clone() {
+                font
+            } else {
+                let Some(font) = Font::new(DEFAULT_FONT) else {
+                    warn!("Failed to build font.");
+                    continue;
+                };
+                font
             };
 
             // Wait to get the backend
             let build_result = bevy::tasks::block_on(async {
-                Builder::from_font(font)
+                let mut builder = Builder::from_font(font)
+                    .with_font_size_px(options.font_size_px)
+                    .with_fonts(options.additional_fonts.clone())
+                    .with_regular_fonts(options.additional_regular_fonts.clone())
+                    .with_bold_fonts(options.additional_bold_fonts.clone())
+                    .with_italic_fonts(options.additional_italic_fonts.clone())
+                    .with_bold_italic_fonts(options.additional_bold_italic_fonts.clone())
                     .with_width_and_height(Dimensions {
                         width: NonZeroU32::new(size.width.max(1)).unwrap(), // Safety: we use .max(1) to guarantee non-zero
                         height: NonZeroU32::new(size.height.max(1)).unwrap(), // Safety: we use .max(1) to guarantee non-zero
                     })
-                    .build_with_target(surface_target)
-                    .await
+                    .with_fg_color(options.reset_fg)
+                    .with_bg_color(options.reset_bg)
+                    .with_rapid_blink_millis(options.fast_blink)
+                    .with_slow_blink_millis(options.slow_blink);
+
+                if let Some(mode) = options.present_mode {
+                    builder = builder.with_present_mode(mode);
+                }
+
+                builder.build_with_target(surface_target).await
             });
 
             // Build the terminal

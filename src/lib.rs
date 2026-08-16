@@ -15,6 +15,8 @@
 pub mod components;
 /// Contains all the user facing messages for the crate.
 pub mod messages;
+/// Contains all the user facing resources for the crate.
+pub mod resources;
 pub(crate) mod systems;
 
 mod bevy_ratatui_minimal_plugins;
@@ -31,6 +33,8 @@ pub mod prelude {
     pub use crate::components::RatatuiTerminal;
 
     pub use crate::messages::ChangeFont;
+
+    pub use crate::resources::BevyRatatuiWgpuOptions;
 
     pub use crate::BevyRatatuiMinimalPlugins;
     pub use crate::BevyRatatuiWgpuPlugin;

@@ -2,9 +2,9 @@ use std::{num::NonZeroU32, path::PathBuf};
 
 use bevy::{ecs::system::NonSendMarker, prelude::*, window::RawHandleWrapper, winit::WINIT_WINDOWS};
 use ratatui::prelude::*;
-use ratatui_wgpu::{Builder, Dimensions, Font};
+use ratatui_wgpu::{Builder, Dimensions};
 
-use crate::{components::RatatuiTerminal, get_font};
+use crate::{components::RatatuiTerminal, get_font, prelude::BevyRatatuiWgpuOptions};
 
 /// A message sent to dynamically change the font of an existing terminal window.
 #[derive(Message)]
@@ -20,6 +20,7 @@ pub struct ChangeFont {
 pub fn handle_change_font(
     mut m_change_font: MessageReader<ChangeFont>,
     // winit_windows: NonSend<WinitWindows>,
+    options: Res<BevyRatatuiWgpuOptions>,
     q_windows: Query<&RawHandleWrapper>,
     mut q_terminals: Query<&mut RatatuiTerminal>,
     _non_send_marker: NonSendMarker, // no NonSend<> resources in 0.19, must build backend on main thread
@@ -41,20 +42,34 @@ pub fn handle_change_font(
             let size = winit_window.inner_size();
 
             // Build the font
-            let Some(font) = Font::new(get_font(&message.font)) else {
+            let Some(font) = get_font(&message.font) else {
                 warn!("Failed to build font.");
                 continue;
             };
 
             // Wait to get the backend
             let build_result = bevy::tasks::block_on(async {
-                Builder::from_font(font)
+                let mut builder = Builder::from_font(font)
+                    .with_font_size_px(options.font_size_px)
+                    .with_fonts(options.additional_fonts.clone())
+                    .with_regular_fonts(options.additional_regular_fonts.clone())
+                    .with_bold_fonts(options.additional_bold_fonts.clone())
+                    .with_italic_fonts(options.additional_italic_fonts.clone())
+                    .with_bold_italic_fonts(options.additional_bold_italic_fonts.clone())
                     .with_width_and_height(Dimensions {
                         width: NonZeroU32::new(size.width.max(1)).unwrap(), // Safety: we use .max(1) to guarantee non-zero
                         height: NonZeroU32::new(size.height.max(1)).unwrap(), // Safety: we use .max(1) to guarantee non-zero
                     })
-                    .build_with_target(surface_target)
-                    .await
+                    .with_fg_color(options.reset_fg)
+                    .with_bg_color(options.reset_bg)
+                    .with_rapid_blink_millis(options.fast_blink)
+                    .with_slow_blink_millis(options.slow_blink);
+
+                if let Some(mode) = options.present_mode {
+                    builder = builder.with_present_mode(mode);
+                }
+
+                builder.build_with_target(surface_target).await
             });
 
             // Build the terminal

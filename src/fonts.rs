@@ -5,6 +5,7 @@ use std::{
 };
 
 use bevy::{platform::collections::HashMap, prelude::*};
+use ratatui_wgpu::Font;
 
 static FONT_LIST: OnceLock<Mutex<HashMap<PathBuf, &'static [u8]>>> = OnceLock::new();
 
@@ -16,27 +17,27 @@ pub static DEFAULT_FONT: &[u8] = include_bytes!("../assets/fonts/JuliaMono-Regul
 /// prevent duplicate file reads and optimize memory usage.
 ///
 /// If the font fails to load, it will log an error and safely return `DEFAULT_FONT`.
-pub fn get_font(path: impl AsRef<Path>) -> &'static [u8] {
+pub fn get_font(path: impl AsRef<Path>) -> Option<Font<'static>> {
     let path = path.as_ref();
     let cache = FONT_LIST.get_or_init(|| Mutex::new(HashMap::new()));
 
     let Ok(mut map) = cache.lock() else {
         error!("Failed to get font list.");
-        return DEFAULT_FONT;
+        return Font::new(DEFAULT_FONT);
     };
 
     if let Some(font_bytes) = map.get(path) {
-        return *font_bytes;
+        return Font::new(*font_bytes);
     }
 
     let Ok(bytes) = fs::read(path) else {
         error!("Failed to load font: {:?}", path);
-        return DEFAULT_FONT;
+        return Font::new(DEFAULT_FONT);
     };
 
     let static_bytes = bytes.leak();
 
     map.insert(path.to_path_buf(), static_bytes);
 
-    static_bytes
+    Font::new(static_bytes)
 }
