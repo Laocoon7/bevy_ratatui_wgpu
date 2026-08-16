@@ -30,3 +30,15 @@ This crate provides two plugins:
   - Sending a `ChangeFont` message will cause the terminal to be automatically rebuilt with the new font.
 
   - Fonts are automatically cached by file path.
+
+## Notes
+- Be sure to turn off Bevy's default features and include only necessary features. Other features may work (e.g. `bevy_state`) Here is an example minimal feature set:
+
+```toml
+bevy = { version = "0.19", default-features = false, features = [
+    "async_executor",
+    "bevy_log",
+    "bevy_winit",
+    "bevy_window",
+]}
+```
